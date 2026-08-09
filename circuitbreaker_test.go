@@ -220,6 +220,17 @@ func TestExecute(t *testing.T) {
 	}
 }
 
+func TestExecuteNilFn(t *testing.T) {
+	cb := newTestCB(t)
+	err := cb.Execute(nil)
+	if err == nil {
+		t.Fatal("nil 执行函数应报错")
+	}
+	if code, _ := errx.CodeOf(err); code != CodeInvalidConfig {
+		t.Errorf("错误码 = %s,want %s", code, CodeInvalidConfig)
+	}
+}
+
 func TestOnStateChange(t *testing.T) {
 	var events []string
 	cb := newTestCB(t,

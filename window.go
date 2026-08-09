@@ -118,6 +118,9 @@ func (w *Window) emitRejected() {
 // Wait 阻塞等待许可,ctx 取消立即返回。
 // 采用轮询实现(间隔为窗口的 1/10,10-100ms)。
 func (w *Window) Wait(ctx context.Context) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	poll := w.cfg.window / 10
 	if poll < windowPollBase {
 		poll = windowPollBase

@@ -86,3 +86,17 @@
 - Limiter.SetRate:运行期动态调整限流速率
   (支持基于下游健康度调整),非法速率不改原值;
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.8.0] - 2026-08-09
+
+### 修复
+
+- nil context 防护:限流 Wait/WaitN、舱壁 Acquire、窗口 Wait
+  (nil 视为 Background,不再 panic);
+- Execute nil 执行函数返回 RESX_INVALID_CONFIG。
+
+### 正式版预备
+
+- api-design 升级为组件 API 参考(v0.8.0 总览);
+- README 稳定性承诺(自 v1.0.0 生效);
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

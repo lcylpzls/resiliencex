@@ -150,6 +150,17 @@ func TestWindowWaitCanceled(t *testing.T) {
 	}
 }
 
+func TestWindowWaitNilContext(t *testing.T) {
+	w, err := NewFixedWindow(1e9, time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//lint:ignore SA1012 有意覆盖 nil context 防护逻辑
+	if err := w.Wait(nil); err != nil {
+		t.Fatalf("nil ctx 应视为 Background:%v", err)
+	}
+}
+
 func TestWindowMetrics(t *testing.T) {
 	m := newFakeMetrics()
 	logger := &fakeLogger{}

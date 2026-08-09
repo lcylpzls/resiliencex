@@ -55,6 +55,9 @@ func (b *Bulkhead) TryAcquire() (release func(), ok bool) {
 
 // Acquire 阻塞获取许可,ctx 取消立即返回。
 func (b *Bulkhead) Acquire(ctx context.Context) (func(), error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	select {
 	case b.sem <- struct{}{}:
 		b.emitAccepted()

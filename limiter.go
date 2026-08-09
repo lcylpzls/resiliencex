@@ -102,6 +102,9 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 	if n <= 0 {
 		return nil
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	l.mu.Lock()
 	if float64(n) > l.burst {
 		l.mu.Unlock()

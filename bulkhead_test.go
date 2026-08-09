@@ -113,6 +113,19 @@ func TestBulkheadConcurrent(t *testing.T) {
 	}
 }
 
+func TestAcquireNilContext(t *testing.T) {
+	b, err := NewBulkhead(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//lint:ignore SA1012 有意覆盖 nil context 防护逻辑
+	release, err := b.Acquire(nil)
+	if err != nil {
+		t.Fatalf("nil ctx 应视为 Background:%v", err)
+	}
+	release()
+}
+
 // FuzzBulkhead 保证任意并发操作不 panic。
 func FuzzBulkhead(f *testing.F) {
 	f.Add(1)

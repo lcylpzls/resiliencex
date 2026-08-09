@@ -344,6 +344,9 @@ func (cb *CircuitBreaker) Failure() {
 
 // Execute 执行并自动上报成功/失败。
 func (cb *CircuitBreaker) Execute(fn func() error) error {
+	if fn == nil {
+		return errx.New(errx.KindInvalid, CodeInvalidConfig, "执行函数不能为空")
+	}
 	if err := cb.Allow(); err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
-# resiliencex API 设计草案
+# resiliencex API 参考
 
-> 本文是评审稿;各组件随版本冻结。
+> 状态:**v1.0.0 待冻结**。组件 API 已稳定,正式版冻结后
+> 新增能力以次版本发布,破坏性变更仅随主版本。
 
 ## 1. 快速上手
 
@@ -111,3 +112,35 @@ WithLogger(l logx.Logger)
 | v0.4.0 | 观测完善 + 组合示例 |
 | v0.5.0 | 性能优化 + 对比基准 |
 | v0.6.0+ | 工业级打磨与自我审查 |
+
+## 8. 组件 API 总览(v0.8.0)
+
+### 限流器
+
+- NewTokenBucket(rate, burst, opts...) / Rate / Burst / SetRate;
+- Allow / AllowN / Wait(ctx) / WaitN(ctx, n);
+- 拒绝:KindRateLimited + RESX_RATE_LIMITED(ErrRateLimited 辅助)。
+
+### 熔断器
+
+- NewCircuitBreaker(opts...) / Allow / Success / Failure / Execute /
+  State / Counts;
+- 选项:WithFailureThreshold / WithMinRequests / WithOpenTimeout /
+  WithHalfOpenMax / WithWindow / WithOnStateChange / WithMetrics / WithLogger;
+- 拒绝:KindUnavailable + RESX_CIRCUIT_OPEN(ErrCircuitOpen 辅助)。
+
+### 舱壁
+
+- NewBulkhead(max, opts...) / TryAcquire / Acquire(ctx) / Available;
+- 等待取消:KindCancelled + RESX_WAIT_CANCELED。
+
+### 窗口限流
+
+- NewFixedWindow(limit, window, opts...) / NewSlidingWindow(...);
+- Allow / Wait(ctx),布尔拒绝。
+
+### 通用
+
+- WithMetrics / WithLogger(跨组件复用);
+- 所有阻塞 API 对 nil context 视为 Background;
+- Execute 对 nil 执行函数返回 RESX_INVALID_CONFIG。

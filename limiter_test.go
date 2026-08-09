@@ -192,6 +192,20 @@ func TestWaitNExceedsBurst(t *testing.T) {
 	}
 }
 
+func TestWaitNilContext(t *testing.T) {
+	l, err := NewTokenBucket(100, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !l.Allow() {
+		t.Fatal("初始应通过")
+	}
+	//lint:ignore SA1012 有意覆盖 nil context 防护逻辑
+	if err := l.Wait(nil); err != nil {
+		t.Fatalf("nil ctx 应视为 Background:%v", err)
+	}
+}
+
 func TestLimiterMetrics(t *testing.T) {
 	m := newFakeMetrics()
 	l, err := NewTokenBucket(1, 2, WithMetrics(m))
@@ -247,8 +261,8 @@ func TestErrCircuitOpen(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	if Version != "v0.7.0" {
-		t.Errorf("Version = %s,want v0.7.0", Version)
+	if Version != "v0.8.0" {
+		t.Errorf("Version = %s,want v0.8.0", Version)
 	}
 }
 
