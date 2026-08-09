@@ -67,7 +67,7 @@ func newWindow(limit int, window time.Duration, sliding bool, opts []Option) (*W
 	w := &Window{
 		cfg:     cfg,
 		metrics: cfg.metrics,
-		start:   time.Now(),
+		start:   cfg.now(),
 	}
 	if sliding {
 		w.times = make([]time.Time, limit)

@@ -54,4 +54,5 @@
 - ErrRateLimited 辅助错误(统一 KindRateLimited + RESX_RATE_LIMITED);
 - 组合示例 examples/gateway:限流 + 熔断 + 舱壁串联调用下游;
 - CI 新增 examples job;
+- 修复:固定窗口起始时间统一使用注入时钟(CI 时序暴露);
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
