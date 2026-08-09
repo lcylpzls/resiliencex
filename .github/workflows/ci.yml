@@ -68,6 +68,15 @@ jobs:
       - name: Fuzz limiter (5s)
         run: go test -run '^$' -fuzz '^FuzzLimiter$' -fuzztime=5s .
 
+      - name: Fuzz circuit breaker (5s)
+        run: go test -run '^$' -fuzz '^FuzzCircuitBreaker$' -fuzztime=5s .
+
+      - name: Fuzz bulkhead (5s)
+        run: go test -run '^$' -fuzz '^FuzzBulkhead$' -fuzztime=5s .
+
+      - name: Fuzz window (5s)
+        run: go test -run '^$' -fuzz '^FuzzWindow$' -fuzztime=5s .
+
   examples:
     runs-on: ubuntu-latest
     steps:

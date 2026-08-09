@@ -67,3 +67,14 @@
 - 与 gobreaker 对比:Execute 相当(23.3 vs 23.6ns);
 - docs/performance.md 基准与对比方法;
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.6.0] - 2026-08-09
+
+### 治理与文档
+
+- SECURITY.md、CODEOWNERS、CONTRIBUTING、issue/PR 模板;
+- operations(组件速查/参数表)、quality(质量门槛)、release(发布流程)、
+  comparison(与治理库对比)文档;
+- ErrCircuitOpen 辅助错误;Version 常量;
+- CI fuzz 扩展至 4 个目标(limiter/circuitbreaker/bulkhead/window);
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

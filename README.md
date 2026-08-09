@@ -3,7 +3,7 @@
 自研服务治理组件库:令牌桶限流、熔断器、舱壁隔离,
 拒绝语义统一 errx,观测外部注入,零第三方依赖。
 
-> 当前状态:**v0.5.0 实现完成,待 CI 验证与发布**。
+> 当前状态:**v0.6.0 实现完成,待 CI 验证与发布**。
 
 ## 快速上手
 
@@ -68,6 +68,18 @@ resiliencex 不是治理编排框架,不解决「组件怎么串」的问题;它
 - 限流 Allow 10ns / 熔断 Allow 8ns / 窗口 Allow 8ns,全部 0 分配;
 - 限流为 x/time/rate 的 3 倍快,熔断 Execute 与 gobreaker 相当;
 - 详见 [docs/performance.md](docs/performance.md)。
+
+## 文档
+
+- [docs/README.md](docs/README.md) — 文档索引
+- [docs/operations.md](docs/operations.md) — 运行手册
+- [docs/comparison.md](docs/comparison.md) — 与治理库对比
+- [examples/gateway](examples/gateway) — 组合示例
+
+## 贡献与安全
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — 开发流程与质量门槛
+- [SECURITY.md](SECURITY.md) — 安全说明与漏洞报告
 
 ## 文档
 

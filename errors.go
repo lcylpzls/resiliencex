@@ -28,3 +28,8 @@ func init() {
 func ErrRateLimited() error {
 	return errx.New(errx.KindRateLimited, CodeRateLimited, "限流拒绝")
 }
+
+// ErrCircuitOpen 返回熔断拒绝错误(便于调用方统一比较)。
+func ErrCircuitOpen() error {
+	return errx.New(errx.KindUnavailable, CodeCircuitOpen, "熔断拒绝")
+}

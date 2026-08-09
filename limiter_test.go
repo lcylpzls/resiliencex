@@ -236,6 +236,22 @@ func TestErrRateLimited(t *testing.T) {
 	}
 }
 
+func TestErrCircuitOpen(t *testing.T) {
+	err := ErrCircuitOpen()
+	if code, _ := errx.CodeOf(err); code != CodeCircuitOpen {
+		t.Errorf("错误码 = %s,want %s", code, CodeCircuitOpen)
+	}
+	if kind := errx.KindOf(err); kind != errx.KindUnavailable {
+		t.Errorf("分类 = %s", kind)
+	}
+}
+
+func TestVersion(t *testing.T) {
+	if Version != "v0.6.0" {
+		t.Errorf("Version = %s,want v0.6.0", Version)
+	}
+}
+
 func TestLimiterOptions(t *testing.T) {
 	logger := &fakeLogger{}
 	m := newFakeMetrics()
