@@ -36,6 +36,17 @@ func (l *fakeLogger) Sync() error                             { return nil }
 func (l *fakeLogger) Close() error                            { return nil }
 func (l *fakeLogger) SafeExit(func())                         {}
 
+func (l *fakeLogger) hasWarn(msg string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, m := range l.warns {
+		if m == msg {
+			return true
+		}
+	}
+	return false
+}
+
 // fakeMetrics 是 Metrics 的内存实现,用于断言指标输出。
 type fakeMetrics struct {
 	mu        sync.Mutex

@@ -19,3 +19,15 @@
 - RESX_* 错误码(errx),限流拒绝 KindRateLimited;
 - 零第三方依赖;覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿;
 - Allow 命中基准 10.6ns,0 分配。
+
+## [v0.2.0] - 2026-08-09
+
+### 新增
+
+- 熔断器:Closed / Open / HalfOpen 三态状态机;
+- 滑动窗口统计(默认 1s × 10,可配),失败率 + 最小请求数触发;
+- HalfOpen 探测(可配探测数),全成功恢复、任一失败重开;
+- Allow / Success / Failure / Execute / State / Counts;
+- OnStateChange 事件(锁外调用)、logx 状态 Warn、Metrics 全接入;
+- 熔断拒绝 KindUnavailable + RESX_CIRCUIT_OPEN;
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

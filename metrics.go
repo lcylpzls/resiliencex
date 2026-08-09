@@ -12,4 +12,7 @@ type Metrics interface {
 const (
 	metricLimiterAccepted = "resx.limiter.accepted"
 	metricLimiterRejected = "resx.limiter.rejected"
+	metricCBAccepted      = "resx.circuitbreaker.accepted"
+	metricCBRejected      = "resx.circuitbreaker.rejected"
+	metricStateChange     = "resx.circuitbreaker.state_changes"
 )

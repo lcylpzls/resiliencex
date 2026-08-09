@@ -123,7 +123,7 @@ func TestWaitImmediate(t *testing.T) {
 }
 
 func TestWaitNBlocks(t *testing.T) {
-	l, err := NewTokenBucket(1000, 1)
+	l, err := NewTokenBucket(100, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestWaitNBlocks(t *testing.T) {
 	if err := l.WaitN(context.Background(), 1); err != nil {
 		t.Fatalf("等待应通过:%v", err)
 	}
-	if elapsed := time.Since(start); elapsed < 500*time.Microsecond {
+	if elapsed := time.Since(start); elapsed < 5*time.Millisecond {
 		t.Errorf("等待过短:%v", elapsed)
 	}
 	// 等待后令牌已消耗,再次 Allow 应拒绝
