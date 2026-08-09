@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lcylpzls/errx"
+	"github.com/lcylpzls/logx"
 )
 
 // windowPollInterval 是窗口限流 Wait 的轮询间隔(取窗口的 1/10,有上限)。
@@ -16,42 +17,57 @@ const (
 
 // windowConfig 是窗口限流配置。
 type windowConfig struct {
-	limit  int
-	window time.Duration
-	now    func() time.Time
+	limit   int
+	window  time.Duration
+	now     func() time.Time
+	metrics Metrics
+	logger  logx.Logger
+}
+
+func (c *windowConfig) setMetrics(m Metrics) { c.metrics = m }
+func (c *windowConfig) setLogger(l logx.Logger) {
+	c.logger = l
 }
 
 // Window 是固定或滑动窗口限流器。
 type Window struct {
-	mu    sync.Mutex
-	cfg   *windowConfig
-	start time.Time   // 固定窗口起点
-	count int         // 固定窗口计数
-	times []time.Time // 滑动窗口环形时间戳
-	head  int
-	size  int
+	mu      sync.Mutex
+	cfg     *windowConfig
+	metrics Metrics
+	start   time.Time   // 固定窗口起点
+	count   int         // 固定窗口计数
+	times   []time.Time // 滑动窗口环形时间戳
+	head    int
+	size    int
 }
 
 // NewFixedWindow 创建固定窗口限流:每 window 内最多 limit 次。
-func NewFixedWindow(limit int, window time.Duration) (*Window, error) {
-	return newWindow(limit, window, false)
+func NewFixedWindow(limit int, window time.Duration, opts ...Option) (*Window, error) {
+	return newWindow(limit, window, false, opts)
 }
 
 // NewSlidingWindow 创建滑动窗口限流:任意连续 window 内最多 limit 次。
-func NewSlidingWindow(limit int, window time.Duration) (*Window, error) {
-	return newWindow(limit, window, true)
+func NewSlidingWindow(limit int, window time.Duration, opts ...Option) (*Window, error) {
+	return newWindow(limit, window, true, opts)
 }
 
-func newWindow(limit int, window time.Duration, sliding bool) (*Window, error) {
+func newWindow(limit int, window time.Duration, sliding bool, opts []Option) (*Window, error) {
 	if limit < 1 {
 		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "limit 必须大于等于 1")
 	}
 	if window <= 0 {
 		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "窗口时长必须为正数")
 	}
+	cfg := &windowConfig{limit: limit, window: window, now: time.Now}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(cfg)
+		}
+	}
 	w := &Window{
-		cfg:   &windowConfig{limit: limit, window: window, now: time.Now},
-		start: time.Now(),
+		cfg:     cfg,
+		metrics: cfg.metrics,
+		start:   time.Now(),
 	}
 	if sliding {
 		w.times = make([]time.Time, limit)
@@ -71,6 +87,7 @@ func (w *Window) Allow() bool {
 			w.size--
 		}
 		if w.size >= w.cfg.limit {
+			w.emitRejected()
 			return false
 		}
 		idx := (w.head + w.size) % len(w.times)
@@ -84,10 +101,18 @@ func (w *Window) Allow() bool {
 		w.count = 0
 	}
 	if w.count >= w.cfg.limit {
+		w.emitRejected()
 		return false
 	}
 	w.count++
 	return true
+}
+
+// emitRejected 输出拒绝指标。
+func (w *Window) emitRejected() {
+	if w.metrics != nil {
+		w.metrics.IncCounter(metricWindowRejected)
+	}
 }
 
 // Wait 阻塞等待许可,ctx 取消立即返回。

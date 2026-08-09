@@ -17,4 +17,6 @@ const (
 	metricStateChange      = "resx.circuitbreaker.state_changes"
 	metricBulkheadAccepted = "resx.bulkhead.accepted"
 	metricBulkheadRejected = "resx.bulkhead.rejected"
+	metricWindowRejected   = "resx.window.rejected"
+	metricLimiterWaitDur   = "resx.limiter.wait_duration"
 )

@@ -68,6 +68,24 @@ jobs:
       - name: Fuzz limiter (5s)
         run: go test -run '^$' -fuzz '^FuzzLimiter$' -fuzztime=5s .
 
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.26.x'
+          check-latest: true
+
+      - name: Build and vet examples
+        run: |
+          for dir in gateway; do
+            (cd examples/$dir && go build ./... && go vet ./...)
+          done
+
   bench:
     runs-on: ubuntu-latest
     steps:

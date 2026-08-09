@@ -23,3 +23,8 @@ func init() {
 	errx.RegisterCode(CodeBulkheadFull, "舱壁拒绝")
 	errx.RegisterCode(CodeWaitCanceled, "等待限流许可被取消")
 }
+
+// ErrRateLimited 返回限流拒绝错误(便于调用方统一比较)。
+func ErrRateLimited() error {
+	return errx.New(errx.KindRateLimited, CodeRateLimited, "限流拒绝")
+}

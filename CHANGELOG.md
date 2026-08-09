@@ -44,3 +44,14 @@
 - 舱壁等待取消 RESX_WAIT_CANCELED;
 - Metrics 全接入(bulkhead accepted/rejected);
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.4.0] - 2026-08-09
+
+### 新增
+
+- 观测完善:限流 Wait 耗时观测(resx.limiter.wait_duration),
+  窗口拒绝计数(resx.window.rejected),窗口支持 Metrics/Logger 注入;
+- ErrRateLimited 辅助错误(统一 KindRateLimited + RESX_RATE_LIMITED);
+- 组合示例 examples/gateway:限流 + 熔断 + 舱壁串联调用下游;
+- CI 新增 examples job;
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

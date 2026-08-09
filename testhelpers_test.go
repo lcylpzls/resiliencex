@@ -86,3 +86,9 @@ func (m *fakeMetrics) counter(name string) int {
 	defer m.mu.Unlock()
 	return m.counters[name]
 }
+
+func (m *fakeMetrics) durationCount(name string) int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return len(m.durations[name])
+}

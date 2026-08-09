@@ -148,6 +148,24 @@ func TestWindowWaitCanceled(t *testing.T) {
 	}
 }
 
+func TestWindowMetrics(t *testing.T) {
+	m := newFakeMetrics()
+	logger := &fakeLogger{}
+	w, err := NewFixedWindow(1, time.Second, WithMetrics(m), WithLogger(logger))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !w.Allow() {
+		t.Fatal("首次应通过")
+	}
+	if w.Allow() {
+		t.Fatal("应拒绝")
+	}
+	if m.counter(metricWindowRejected) != 1 {
+		t.Errorf("rejected = %d,want 1", m.counter(metricWindowRejected))
+	}
+}
+
 // FuzzWindow 保证任意窗口参数与操作不 panic。
 func FuzzWindow(f *testing.F) {
 	f.Add(1, int64(1000000))

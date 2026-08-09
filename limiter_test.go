@@ -209,6 +209,33 @@ func TestLimiterMetrics(t *testing.T) {
 	}
 }
 
+func TestLimiterWaitDurationMetric(t *testing.T) {
+	m := newFakeMetrics()
+	l, err := NewTokenBucket(100, 1, WithMetrics(m))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !l.Allow() {
+		t.Fatal("初始应通过")
+	}
+	if err := l.WaitN(context.Background(), 1); err != nil {
+		t.Fatalf("等待应通过:%v", err)
+	}
+	if m.durationCount(metricLimiterWaitDur) != 1 {
+		t.Errorf("wait_duration 未记录:%d", m.durationCount(metricLimiterWaitDur))
+	}
+}
+
+func TestErrRateLimited(t *testing.T) {
+	err := ErrRateLimited()
+	if code, _ := errx.CodeOf(err); code != CodeRateLimited {
+		t.Errorf("错误码 = %s,want %s", code, CodeRateLimited)
+	}
+	if kind := errx.KindOf(err); kind != errx.KindRateLimited {
+		t.Errorf("分类 = %s", kind)
+	}
+}
+
 func TestLimiterOptions(t *testing.T) {
 	logger := &fakeLogger{}
 	m := newFakeMetrics()

@@ -104,6 +104,7 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 	}
 	timer := time.NewTimer(wait)
 	defer timer.Stop()
+	start := time.Now()
 	select {
 	case <-ctx.Done():
 		// 归还预定的令牌。
@@ -112,6 +113,9 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 		l.mu.Unlock()
 		return errx.Wrap(ctx.Err(), errx.KindCancelled, CodeWaitCanceled, "等待限流许可被取消")
 	case <-timer.C:
+		if l.metrics != nil {
+			l.metrics.ObserveDuration(metricLimiterWaitDur, time.Since(start).Seconds())
+		}
 		l.accepted()
 		return nil
 	}
