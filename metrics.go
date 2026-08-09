@@ -10,9 +10,11 @@ type Metrics interface {
 
 // 指标名称:统一为 resx.* 前缀。
 const (
-	metricLimiterAccepted = "resx.limiter.accepted"
-	metricLimiterRejected = "resx.limiter.rejected"
-	metricCBAccepted      = "resx.circuitbreaker.accepted"
-	metricCBRejected      = "resx.circuitbreaker.rejected"
-	metricStateChange     = "resx.circuitbreaker.state_changes"
+	metricLimiterAccepted  = "resx.limiter.accepted"
+	metricLimiterRejected  = "resx.limiter.rejected"
+	metricCBAccepted       = "resx.circuitbreaker.accepted"
+	metricCBRejected       = "resx.circuitbreaker.rejected"
+	metricStateChange      = "resx.circuitbreaker.state_changes"
+	metricBulkheadAccepted = "resx.bulkhead.accepted"
+	metricBulkheadRejected = "resx.bulkhead.rejected"
 )

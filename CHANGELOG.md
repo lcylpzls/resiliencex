@@ -31,3 +31,16 @@
 - OnStateChange 事件(锁外调用)、logx 状态 Warn、Metrics 全接入;
 - 熔断拒绝 KindUnavailable + RESX_CIRCUIT_OPEN;
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.3.0] - 2026-08-09
+
+### 新增
+
+- 舱壁:Bulkhead 信号量隔离,TryAcquire / Acquire(ctx) /
+  release(每个许可独立幂等)/ Available;
+- 窗口限流:NewFixedWindow / NewSlidingWindow(环形时间戳,
+  任意连续窗口精确计数);
+- 窗口 Wait:轮询等待(ctx 取消感知,间隔窗口 1/10);
+- 舱壁等待取消 RESX_WAIT_CANCELED;
+- Metrics 全接入(bulkhead accepted/rejected);
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

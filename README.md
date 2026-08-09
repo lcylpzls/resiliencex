@@ -3,7 +3,7 @@
 自研服务治理组件库:令牌桶限流、熔断器、舱壁隔离,
 拒绝语义统一 errx,观测外部注入,零第三方依赖。
 
-> 当前状态:**v0.2.0 实现完成,待 CI 验证与发布**。
+> 当前状态:**v0.3.0 实现完成,待 CI 验证与发布**。
 
 ## 快速上手
 
@@ -31,6 +31,26 @@ if err != nil {
 	panic(err)
 }
 err = cb.Execute(func() error { return callDownstream() })
+
+// 舱壁:最多 10 个并发
+bulkhead, err := resiliencex.NewBulkhead(10)
+if err != nil {
+	panic(err)
+}
+release, err := bulkhead.Acquire(ctx)
+if err != nil {
+	return err
+}
+defer release()
+
+// 窗口限流:固定或滑动窗口
+window, err := resiliencex.NewSlidingWindow(100, time.Minute)
+if err != nil {
+	panic(err)
+}
+if !window.Allow() {
+	// 窗口内超限
+}
 ```
 
 ## 定位
