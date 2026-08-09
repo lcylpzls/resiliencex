@@ -2,6 +2,20 @@
 
 本项目遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [v1.0.3] - 2026-08-10
+
+### 新增
+
+- `TraceHook` 受保护调用链路追踪钩子（零依赖接口 +
+  `WithTraceHook`）：新增 `ExecuteContext(ctx, fn)`，熔断执行自动
+  埋点（resiliencex.type / resiliencex.state 属性），成功/失败/
+  拒绝三路记录，由 tracex 等外部适配器接入；
+- `Execute` 保持向后兼容（委托 ExecuteContext）。
+
+### 质量
+
+- 覆盖率恢复 100%；race / vet / staticcheck 全绿。
+
 ## [Unreleased]
 
 ### 规划

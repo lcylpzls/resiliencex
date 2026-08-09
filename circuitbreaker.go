@@ -1,6 +1,7 @@
 package resiliencex
 
 import (
+	"context"
 	"math"
 	"sync"
 	"time"
@@ -124,6 +125,7 @@ type circuitConfig struct {
 	onStateChange    func(State, State)
 	metrics          Metrics
 	logger           logx.Logger
+	traceHook        TraceHook
 	now              func() time.Time
 }
 
@@ -195,6 +197,15 @@ func WithOnStateChange(fn func(from, to State)) Option {
 	return func(c configApplier) {
 		if cc, ok := c.(*circuitConfig); ok {
 			cc.onStateChange = fn
+		}
+	}
+}
+
+// WithTraceHook 设置受保护调用链路追踪钩子。
+func WithTraceHook(h TraceHook) Option {
+	return func(c configApplier) {
+		if cc, ok := c.(*circuitConfig); ok {
+			cc.traceHook = h
 		}
 	}
 }
@@ -347,15 +358,38 @@ func (cb *CircuitBreaker) Execute(fn func() error) error {
 	if fn == nil {
 		return errx.NewCode(CodeInvalidConfig, "执行函数不能为空")
 	}
+	return cb.ExecuteContext(context.Background(), func(context.Context) error { return fn() })
+}
+
+// ExecuteContext 以受保护方式执行 fn，自动熔断并记录链路 span。
+func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, fn func(context.Context) error) error {
+	if fn == nil {
+		return errx.NewCode(CodeInvalidConfig, "执行函数不能为空")
+	}
+	traceCtx, end := cb.startTrace(ctx)
 	if err := cb.Allow(); err != nil {
+		end(err)
 		return err
 	}
-	if err := fn(); err != nil {
+	if err := fn(traceCtx); err != nil {
 		cb.Failure()
+		end(err)
 		return err
 	}
 	cb.Success()
+	end(nil)
 	return nil
+}
+
+// startTrace 开始受保护调用链路（无钩子时 no-op）。
+func (cb *CircuitBreaker) startTrace(ctx context.Context) (context.Context, func(error)) {
+	if cb.cfg.traceHook == nil {
+		return ctx, func(error) {}
+	}
+	return cb.cfg.traceHook.Start(ctx, "resiliencex.circuit_breaker",
+		TraceAttr{Key: "resiliencex.type", Value: "circuit_breaker"},
+		TraceAttr{Key: "resiliencex.state", Value: cb.State().String()},
+	)
 }
 
 // State 返回当前状态。
