@@ -25,10 +25,10 @@ type Limiter struct {
 // rate 为每秒补充令牌数(>0),burst 为桶容量(>=1)。
 func NewTokenBucket(rate float64, burst int, opts ...Option) (*Limiter, error) {
 	if math.IsNaN(rate) || math.IsInf(rate, 0) || rate <= 0 {
-		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "rate 必须为正数")
+		return nil, errx.NewCode(CodeInvalidConfig, "rate 必须为正数")
 	}
 	if burst < 1 {
-		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "burst 必须大于等于 1")
+		return nil, errx.NewCode(CodeInvalidConfig, "burst 必须大于等于 1")
 	}
 	cfg := &limiterConfig{}
 	for _, opt := range opts {
@@ -56,7 +56,7 @@ func (l *Limiter) Rate() float64 {
 // rate 必须为正数,非法返回 RESX_INVALID_CONFIG 且不改变原值。
 func (l *Limiter) SetRate(rate float64) error {
 	if math.IsNaN(rate) || math.IsInf(rate, 0) || rate <= 0 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "rate 必须为正数")
+		return errx.NewCode(CodeInvalidConfig, "rate 必须为正数")
 	}
 	l.mu.Lock()
 	l.rate = rate
@@ -108,7 +108,7 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 	l.mu.Lock()
 	if float64(n) > l.burst {
 		l.mu.Unlock()
-		return errx.Newf(errx.KindInvalid, CodeInvalidConfig,
+		return errx.NewCodef(CodeInvalidConfig,
 			"单次请求 %d 超过桶容量 %d", n, int(l.burst))
 	}
 	wait := l.reserveN(n, l.now())
@@ -126,7 +126,7 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 		l.mu.Lock()
 		l.tokens += float64(n)
 		l.mu.Unlock()
-		return errx.Wrap(ctx.Err(), errx.KindCancelled, CodeWaitCanceled, "等待限流许可被取消")
+		return errx.WrapCode(ctx.Err(), CodeWaitCanceled, "等待限流许可被取消")
 	case <-timer.C:
 		if l.metrics != nil {
 			l.metrics.ObserveDuration(metricLimiterWaitDur, time.Since(start).Seconds())

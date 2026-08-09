@@ -53,10 +53,10 @@ func NewSlidingWindow(limit int, window time.Duration, opts ...Option) (*Window,
 
 func newWindow(limit int, window time.Duration, sliding bool, opts []Option) (*Window, error) {
 	if limit < 1 {
-		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "limit 必须大于等于 1")
+		return nil, errx.NewCode(CodeInvalidConfig, "limit 必须大于等于 1")
 	}
 	if window <= 0 {
-		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "窗口时长必须为正数")
+		return nil, errx.NewCode(CodeInvalidConfig, "窗口时长必须为正数")
 	}
 	cfg := &windowConfig{limit: limit, window: window, now: time.Now}
 	for _, opt := range opts {
@@ -136,7 +136,7 @@ func (w *Window) Wait(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			timer.Stop()
-			return errx.Wrap(ctx.Err(), errx.KindCancelled, CodeWaitCanceled, "等待窗口许可被取消")
+			return errx.WrapCode(ctx.Err(), CodeWaitCanceled, "等待窗口许可被取消")
 		case <-timer.C:
 		}
 	}

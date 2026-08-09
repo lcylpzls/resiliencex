@@ -29,7 +29,7 @@ type Bulkhead struct {
 // NewBulkhead 创建舱壁,限制 maxConcurrent 个并发。
 func NewBulkhead(maxConcurrent int, opts ...Option) (*Bulkhead, error) {
 	if maxConcurrent < 1 {
-		return nil, errx.New(errx.KindInvalid, CodeInvalidConfig, "maxConcurrent 必须大于等于 1")
+		return nil, errx.NewCode(CodeInvalidConfig, "maxConcurrent 必须大于等于 1")
 	}
 	cfg := &bulkheadConfig{maxConcurrent: maxConcurrent}
 	for _, opt := range opts {
@@ -64,7 +64,7 @@ func (b *Bulkhead) Acquire(ctx context.Context) (func(), error) {
 		return b.releaseOnce(), nil
 	case <-ctx.Done():
 		b.emitRejected()
-		return nil, errx.Wrap(ctx.Err(), errx.KindCancelled, CodeWaitCanceled, "等待舱壁许可被取消")
+		return nil, errx.WrapCode(ctx.Err(), CodeWaitCanceled, "等待舱壁许可被取消")
 	}
 }
 

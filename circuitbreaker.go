@@ -232,19 +232,19 @@ func NewCircuitBreaker(opts ...Option) (*CircuitBreaker, error) {
 func validateCircuitConfig(cfg *circuitConfig) error {
 	if math.IsNaN(cfg.failureThreshold) || math.IsInf(cfg.failureThreshold, 0) ||
 		cfg.failureThreshold <= 0 || cfg.failureThreshold > 1 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "失败率阈值必须在 (0,1]")
+		return errx.NewCode(CodeInvalidConfig, "失败率阈值必须在 (0,1]")
 	}
 	if cfg.minRequests < 1 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "最小请求数必须大于等于 1")
+		return errx.NewCode(CodeInvalidConfig, "最小请求数必须大于等于 1")
 	}
 	if cfg.openTimeout <= 0 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "打开超时必须为正数")
+		return errx.NewCode(CodeInvalidConfig, "打开超时必须为正数")
 	}
 	if cfg.halfOpenMax < 1 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "半开探测数必须大于等于 1")
+		return errx.NewCode(CodeInvalidConfig, "半开探测数必须大于等于 1")
 	}
 	if cfg.slotDuration <= 0 || cfg.windowSize < 1 {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "窗口参数非法")
+		return errx.NewCode(CodeInvalidConfig, "窗口参数非法")
 	}
 	return nil
 }
@@ -264,7 +264,7 @@ func (cb *CircuitBreaker) Allow() error {
 		if now.Before(cb.openUntil) {
 			cb.mu.Unlock()
 			cb.emitRejected()
-			return errx.New(errx.KindUnavailable, CodeCircuitOpen, "熔断器已打开")
+			return errx.NewCode(CodeCircuitOpen, "熔断器已打开")
 		}
 		from := cb.switchStateLocked(StateHalfOpen)
 		cb.halfOpenAllowed = 0
@@ -278,7 +278,7 @@ func (cb *CircuitBreaker) Allow() error {
 		if cb.halfOpenAllowed >= cb.cfg.halfOpenMax {
 			cb.mu.Unlock()
 			cb.emitRejected()
-			return errx.New(errx.KindUnavailable, CodeCircuitOpen, "熔断器探测中")
+			return errx.NewCode(CodeCircuitOpen, "熔断器探测中")
 		}
 		cb.halfOpenAllowed++
 		cb.mu.Unlock()
@@ -287,7 +287,7 @@ func (cb *CircuitBreaker) Allow() error {
 	default:
 		cb.mu.Unlock()
 		cb.emitRejected()
-		return errx.Newf(errx.KindUnavailable, CodeCircuitOpen, "未知熔断状态 %v", cb.state)
+		return errx.NewCodef(CodeCircuitOpen, "未知熔断状态 %v", cb.state)
 	}
 }
 
@@ -345,7 +345,7 @@ func (cb *CircuitBreaker) Failure() {
 // Execute 执行并自动上报成功/失败。
 func (cb *CircuitBreaker) Execute(fn func() error) error {
 	if fn == nil {
-		return errx.New(errx.KindInvalid, CodeInvalidConfig, "执行函数不能为空")
+		return errx.NewCode(CodeInvalidConfig, "执行函数不能为空")
 	}
 	if err := cb.Allow(); err != nil {
 		return err
