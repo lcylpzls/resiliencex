@@ -3,7 +3,7 @@
 自研服务治理组件库:令牌桶限流、熔断器、舱壁隔离,
 拒绝语义统一 errx,观测外部注入,零第三方依赖。
 
-> 当前状态:**v0.6.0 实现完成,待 CI 验证与发布**。
+> 当前状态:**v0.7.0 实现完成,待 CI 验证与发布**。
 
 ## 快速上手
 
@@ -16,6 +16,7 @@ if err != nil {
 if !limiter.Allow() {
 	// 拒绝,统一 errx KindRateLimited
 }
+limiter.SetRate(200) // 运行期动态调整速率
 // 或阻塞等待(ctx 可取消)
 if err := limiter.Wait(ctx); err != nil {
 	// 等待被取消

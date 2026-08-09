@@ -247,8 +247,43 @@ func TestErrCircuitOpen(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	if Version != "v0.6.0" {
-		t.Errorf("Version = %s,want v0.6.0", Version)
+	if Version != "v0.7.0" {
+		t.Errorf("Version = %s,want v0.7.0", Version)
+	}
+}
+
+func TestSetRate(t *testing.T) {
+	l, err := NewTokenBucket(1, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := l.SetRate(10); err != nil {
+		t.Fatalf("SetRate 失败:%v", err)
+	}
+	if l.Rate() != 10 {
+		t.Errorf("Rate = %v,want 10", l.Rate())
+	}
+	// 非法速率不改变原值
+	if err := l.SetRate(0); err == nil {
+		t.Error("rate=0 应非法")
+	}
+	if err := l.SetRate(math.NaN()); err == nil {
+		t.Error("NaN 应非法")
+	}
+	if l.Rate() != 10 {
+		t.Error("非法 SetRate 不应改变速率")
+	}
+	// 速率变化生效:注入时钟验证补充量
+	t0 := time.Now()
+	var now atomic.Value
+	now.Store(t0)
+	l.now = func() time.Time { return now.Load().(time.Time) }
+	if !l.Allow() {
+		t.Fatal("初始应通过")
+	}
+	now.Store(t0.Add(100 * time.Millisecond))
+	if !l.Allow() {
+		t.Fatal("rate=10 时 100ms 应补充 1 个令牌")
 	}
 }
 

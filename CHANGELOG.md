@@ -78,3 +78,11 @@
 - ErrCircuitOpen 辅助错误;Version 常量;
 - CI fuzz 扩展至 4 个目标(limiter/circuitbreaker/bulkhead/window);
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.7.0] - 2026-08-09
+
+### 新增
+
+- Limiter.SetRate:运行期动态调整限流速率
+  (支持基于下游健康度调整),非法速率不改原值;
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

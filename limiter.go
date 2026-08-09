@@ -52,6 +52,18 @@ func (l *Limiter) Rate() float64 {
 	return l.rate
 }
 
+// SetRate 动态调整补充速率(支持运行期基于下游健康度调整)。
+// rate 必须为正数,非法返回 RESX_INVALID_CONFIG 且不改变原值。
+func (l *Limiter) SetRate(rate float64) error {
+	if math.IsNaN(rate) || math.IsInf(rate, 0) || rate <= 0 {
+		return errx.New(errx.KindInvalid, CodeInvalidConfig, "rate 必须为正数")
+	}
+	l.mu.Lock()
+	l.rate = rate
+	l.mu.Unlock()
+	return nil
+}
+
 // Burst 返回桶容量(不可变)。
 func (l *Limiter) Burst() int {
 	return int(l.burst)
