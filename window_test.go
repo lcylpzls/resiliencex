@@ -52,6 +52,7 @@ func TestFixedWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 	w.cfg.now = clock.now
+	w.start = clock.now() // 起始时间与注入时钟对齐
 	for i := 0; i < 2; i++ {
 		if !w.Allow() {
 			t.Fatal("窗口内前两次应通过")
@@ -115,6 +116,7 @@ func TestWindowWait(t *testing.T) {
 		t.Fatal(err)
 	}
 	w.cfg.now = clock.now
+	w.start = clock.now()
 	if !w.Allow() {
 		t.Fatal("首次应通过")
 	}
