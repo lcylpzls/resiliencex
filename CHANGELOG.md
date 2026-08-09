@@ -56,3 +56,14 @@
 - CI 新增 examples job;
 - 修复:固定窗口起始时间统一使用注入时钟(CI 时序暴露);
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v0.5.0] - 2026-08-09
+
+### 性能
+
+- 全组件基准:限流 Allow 10ns、熔断 Allow 8ns、窗口 Allow 8ns,
+  热路径 0 分配;
+- 与 x/time/rate 对比:Allow 2.9x 快、Wait 4.4x 快;
+- 与 gobreaker 对比:Execute 相当(23.3 vs 23.6ns);
+- docs/performance.md 基准与对比方法;
+- 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。

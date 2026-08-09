@@ -3,6 +3,7 @@ package resiliencex
 import (
 	"context"
 	"testing"
+	"time"
 )
 
 // BenchmarkAllowHit 基准:令牌充足时的 Allow 命中。
@@ -40,5 +41,44 @@ func BenchmarkAllowReject(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = l.Allow()
+	}
+}
+
+// BenchmarkCBAallow 基准:熔断器 Closed 状态放行。
+func BenchmarkCBAallow(b *testing.B) {
+	cb, err := NewCircuitBreaker()
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = cb.Allow()
+	}
+}
+
+// BenchmarkBulkheadTryAcquire 基准:舱壁非阻塞获取并释放。
+func BenchmarkBulkheadTryAcquire(b *testing.B) {
+	bh, err := NewBulkhead(1e6)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		release, ok := bh.TryAcquire()
+		if ok {
+			release()
+		}
+	}
+}
+
+// BenchmarkWindowAllow 基准:固定窗口放行。
+func BenchmarkWindowAllow(b *testing.B) {
+	w, err := NewFixedWindow(1e9, time.Second)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = w.Allow()
 	}
 }
