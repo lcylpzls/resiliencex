@@ -100,3 +100,21 @@
 - api-design 升级为组件 API 参考(v0.8.0 总览);
 - README 稳定性承诺(自 v1.0.0 生效);
 - 覆盖率 100%,race / vet / staticcheck / fuzz / vuln 全绿。
+
+## [v1.0.0] - 2026-08-09
+
+### 正式版
+
+- 公开 API 冻结,遵循语义化版本;
+- Version 常量更新为 v1.0.0;
+- README 稳定性承诺正式生效;
+- docs/api-design.md 升级为正式 API 参考(组件 API 总览);
+- 对比文档扩充 uber-ratelimit 实测(阻塞等待 3357x 快);
+- 全量回归:100% 覆盖率、race、staticcheck、fuzz ×4、govulncheck、
+  apidiff 对比 v0.8.0、三平台 CI。
+
+### 版本历程
+
+- v0.1.0 – v0.8.0:限流、熔断、舱壁、窗口、观测、性能、
+  治理与边界修复共 8 个迭代版本;
+- v1.0.0:正式版,API 冻结。

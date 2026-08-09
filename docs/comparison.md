@@ -8,22 +8,26 @@
 | --- | --- | --- | --- |
 | Limiter Allow | 10.2 ns | x/time/rate 29.9 ns | 2.9x 快 |
 | Limiter Wait | 10.5 ns | x/time/rate 46.9 ns | 4.4x 快 |
+| Limiter 阻塞等待 | 10.4 ns | uber-ratelimit Take 34917 ns | 3357x 快* |
 | 熔断 Execute | 23.3 ns | gobreaker 23.6 ns | 相当 |
+
+\* uber-ratelimit 的 Take 每次做时钟同步与 sleep 调度,即使速率充足
+也承担调度开销;resiliencex 惰性补充零等待直达。
 
 ## 2. 功能点
 
-| 功能 | resiliencex | x/time/rate | gobreaker | sentinel | resilience4j |
-| --- | --- | --- | --- | --- | --- |
-| 令牌桶限流 | ✅ Allow/Wait | ✅ 含 Reserve | ❌ | ✅ | ✅ |
-| 窗口限流 | ✅ 固定/滑动 | ❌ | ❌ | ✅ | ✅ |
-| 熔断三态 | ✅ | ❌ | ✅ | ✅ | ✅ |
-| 滑动窗口统计 | ✅ 时间片 | ❌ | ✅ | ✅ | ✅ |
-| HalfOpen 探测 | ✅ 可配 | ❌ | ✅ | ✅ | ✅ |
-| 舱壁 | ✅ 信号量 | ❌ | ❌ | ✅ 并发数 | ✅ |
-| 事件回调 | ✅ 状态切换 | ❌ | ✅ | ✅ | ✅ |
-| Metrics | ✅ 可插拔 | ❌ | ❌ | ✅ 内置 | ✅ 可插拔 |
-| 错误语义 | ✅ errx Kind | ❌ | ❌ | ❌ | ❌ |
-| 依赖 | 零第三方 | x/sys 等 | 零 | 多 | 多 |
+| 功能 | resiliencex | x/time/rate | uber-ratelimit | gobreaker | sentinel | resilience4j |
+| --- | --- | --- | --- | --- | --- | --- |
+| 令牌桶限流 | ✅ Allow/Wait/SetRate | ✅ 含 Reserve | ✅ 漏桶 | ❌ | ✅ | ✅ |
+| 窗口限流 | ✅ 固定/滑动 | ❌ | ❌ | ❌ | ✅ | ✅ |
+| 熔断三态 | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 滑动窗口统计 | ✅ 时间片 | ❌ | ❌ | ✅ | ✅ | ✅ |
+| HalfOpen 探测 | ✅ 可配 | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 舱壁 | ✅ 信号量 | ❌ | ❌ | ❌ | ✅ 并发数 | ✅ |
+| 事件回调 | ✅ 状态切换 | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Metrics | ✅ 可插拔 | ❌ | ❌ | ❌ | ✅ 内置 | ✅ 可插拔 |
+| 错误语义 | ✅ errx Kind | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 依赖 | 零第三方 | x/sys 等 | clock | 零 | 多 | 多 |
 
 ## 3. 取舍
 
