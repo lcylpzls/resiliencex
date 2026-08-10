@@ -3,6 +3,7 @@ package resiliencex
 import (
 	"context"
 	"errors"
+	"github.com/lcylpzls/testx"
 	"sync"
 	"testing"
 	"time"
@@ -54,46 +55,31 @@ func TestCircuitBreakerTraceHook(t *testing.T) {
 		WithMinRequests(1),
 		WithOpenTimeout(time.Hour),
 	)
-	if err := cb.ExecuteContext(context.Background(), func(context.Context) error { return nil }); err != nil {
-		t.Fatal(err)
-	}
-	if err := cb.ExecuteContext(context.Background(), func(context.Context) error {
+	testx.RequireNoError(t, cb.ExecuteContext(context.Background(), func(context.Context) error { return nil }))
+	err := cb.ExecuteContext(context.Background(), func(context.Context) error {
 		return errors.New("业务失败")
-	}); err == nil {
-		t.Fatal("应返回业务失败")
-	}
-	if err := cb.ExecuteContext(context.Background(), func(context.Context) error { return nil }); err == nil {
-		t.Fatal("熔断开启后应拒绝")
-	}
+	})
+	testx.RequireError(t, err)
+	err = cb.ExecuteContext(context.Background(), func(context.Context) error { return nil })
+	testx.RequireError(t, err)
 
 	calls := hook.snapshot()
-	if len(calls) != 3 {
-		t.Fatalf("应调用 3 次追踪钩子，实际：%d", len(calls))
+	testx.RequireLen(t, calls, 3)
+	for _, c := range calls {
+		testx.RequireEqual(t, c.name, "resiliencex.circuit_breaker")
+		testx.RequireEqual(t, c.attrs["resiliencex.type"], "circuit_breaker")
+		testx.RequireNotEmpty(t, c.attrs["resiliencex.state"])
+		testx.RequireTrue(t, c.ended)
 	}
-	for i, c := range calls {
-		if c.name != "resiliencex.circuit_breaker" ||
-			c.attrs["resiliencex.type"] != "circuit_breaker" ||
-			c.attrs["resiliencex.state"] == "" || !c.ended {
-			t.Fatalf("第 %d 次追踪调用不符：%+v", i, c)
-		}
-	}
-	if calls[0].err != nil || calls[1].err == nil || calls[2].err == nil {
-		t.Fatalf("结束回调错误记录不符：%+v", calls)
-	}
+	testx.RequireNil(t, calls[0].err)
+	testx.RequireNotNil(t, calls[1].err)
+	testx.RequireNotNil(t, calls[2].err)
 
 	// Execute 委托（无 ctx）与 nil 校验。
 	hook2 := &fakeTraceHook{}
 	cb2 := newTestCB(t, WithTraceHook(hook2))
-	if err := cb2.Execute(func() error { return nil }); err != nil {
-		t.Fatal(err)
-	}
-	if err := cb2.Execute(nil); err == nil {
-		t.Fatal("nil 执行函数应报错")
-	}
-	if err := cb2.ExecuteContext(context.Background(), nil); err == nil {
-		t.Fatal("ExecuteContext nil 执行函数应报错")
-	}
-	if len(hook2.snapshot()) != 1 {
-		t.Fatalf("Execute 应委托埋点：%+v", hook2.snapshot())
-	}
+	testx.RequireNoError(t, cb2.Execute(func() error { return nil }))
+	testx.RequireError(t, cb2.Execute(nil))
+	testx.RequireError(t, cb2.ExecuteContext(context.Background(), nil))
+	testx.RequireLen(t, hook2.snapshot(), 1)
 }
