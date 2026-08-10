@@ -2,6 +2,16 @@
 
 本项目遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [v1.3.0] - 2026-08-10
+
+### 新增
+
+- Limiter.RetryAfter()：返回补满 1 枚令牌的等待时间（供 HTTP 429 Retry-After 等场景），余量足够时返回 0。
+
+### 质量
+
+- 根包语句覆盖率保持 100%；race / vet / staticcheck / fuzz / govulncheck 全绿。
+
 ## [v1.2.0] - 2026-08-10
 
 ### 变更

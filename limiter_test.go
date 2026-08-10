@@ -88,6 +88,20 @@ func TestAllowRefill(t *testing.T) {
 	}
 }
 
+func TestRetryAfter(t *testing.T) {
+	l, err := NewTokenBucket(100, 1)
+	testx.RequireNoError(t, err)
+	// 满桶时无需等待。
+	testx.RequireEqual(t, l.RetryAfter(), time.Duration(0))
+	// 消耗后需要等待约 10ms 补回 1 枚令牌。
+	testx.RequireTrue(t, l.Allow())
+	wait := l.RetryAfter()
+	testx.RequireTrue(t, wait > 0 && wait <= 20*time.Millisecond)
+	// 补充后恢复 0 等待。
+	time.Sleep(50 * time.Millisecond)
+	testx.RequireEqual(t, l.RetryAfter(), time.Duration(0))
+}
+
 func TestAllowN(t *testing.T) {
 	l, err := NewTokenBucket(1, 5)
 	testx.RequireNoError(t, err)

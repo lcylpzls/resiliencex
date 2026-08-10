@@ -69,6 +69,18 @@ func (l *Limiter) Burst() int {
 	return int(l.burst)
 }
 
+// RetryAfter 返回补满 1 枚令牌所需的等待时间；当前余量足够时返回 0。
+// 用于生成 HTTP 429 响应头 Retry-After 等场景。
+func (l *Limiter) RetryAfter() time.Duration {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.refill(l.now())
+	if l.tokens >= 1 {
+		return 0
+	}
+	return time.Duration((1 - l.tokens) / l.rate * float64(time.Second))
+}
+
 // Allow 等价于 AllowN(1)。
 func (l *Limiter) Allow() bool {
 	return l.AllowN(1)
