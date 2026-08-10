@@ -447,20 +447,20 @@ func (cb *CircuitBreaker) notifyStateChange(from, to State) {
 			logx.Fields(logx.String("from", from.String()), logx.String("to", to.String())))
 	}
 	if cb.cfg.metrics != nil {
-		cb.cfg.metrics.IncCounter(metricStateChange, from.String(), to.String())
+		cb.cfg.metrics.IncCounter(metricStateChange, []string{from.String(), to.String()})
 	}
 }
 
 // emitAccepted 输出放行指标。
 func (cb *CircuitBreaker) emitAccepted() {
 	if cb.cfg.metrics != nil {
-		cb.cfg.metrics.IncCounter(metricCBAccepted)
+		cb.cfg.metrics.IncCounter(metricCBAccepted, nil)
 	}
 }
 
 // emitRejected 输出拒绝指标。
 func (cb *CircuitBreaker) emitRejected() {
 	if cb.cfg.metrics != nil {
-		cb.cfg.metrics.IncCounter(metricCBRejected)
+		cb.cfg.metrics.IncCounter(metricCBRejected, nil)
 	}
 }

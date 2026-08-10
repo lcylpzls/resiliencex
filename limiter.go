@@ -141,7 +141,7 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 		return errx.WrapCode(ctx.Err(), CodeWaitCanceled, "等待限流许可被取消")
 	case <-timer.C:
 		if l.metrics != nil {
-			l.metrics.ObserveDuration(metricLimiterWaitDur, time.Since(start).Seconds())
+			l.metrics.ObserveDuration(metricLimiterWaitDur, time.Since(start).Seconds(), nil)
 		}
 		l.accepted()
 		return nil
@@ -151,14 +151,14 @@ func (l *Limiter) WaitN(ctx context.Context, n int) error {
 // accepted 输出放行指标。
 func (l *Limiter) accepted() {
 	if l.metrics != nil {
-		l.metrics.IncCounter(metricLimiterAccepted)
+		l.metrics.IncCounter(metricLimiterAccepted, nil)
 	}
 }
 
 // rejected 输出拒绝指标。
 func (l *Limiter) rejected() {
 	if l.metrics != nil {
-		l.metrics.IncCounter(metricLimiterRejected)
+		l.metrics.IncCounter(metricLimiterRejected, nil)
 	}
 }
 

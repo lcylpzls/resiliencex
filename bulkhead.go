@@ -86,13 +86,13 @@ func (b *Bulkhead) releaseOnce() func() {
 // emitAccepted 输出放行指标。
 func (b *Bulkhead) emitAccepted() {
 	if b.cfg.metrics != nil {
-		b.cfg.metrics.IncCounter(metricBulkheadAccepted)
+		b.cfg.metrics.IncCounter(metricBulkheadAccepted, nil)
 	}
 }
 
 // emitRejected 输出拒绝指标。
 func (b *Bulkhead) emitRejected() {
 	if b.cfg.metrics != nil {
-		b.cfg.metrics.IncCounter(metricBulkheadRejected)
+		b.cfg.metrics.IncCounter(metricBulkheadRejected, nil)
 	}
 }

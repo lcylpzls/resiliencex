@@ -111,7 +111,7 @@ func (w *Window) Allow() bool {
 // emitRejected 输出拒绝指标。
 func (w *Window) emitRejected() {
 	if w.metrics != nil {
-		w.metrics.IncCounter(metricWindowRejected)
+		w.metrics.IncCounter(metricWindowRejected, nil)
 	}
 }
 
