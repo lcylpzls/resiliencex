@@ -2,6 +2,7 @@ package resiliencex
 
 import (
 	"context"
+	testx "github.com/lcylpzls/testx"
 	"testing"
 	"time"
 )
@@ -9,9 +10,8 @@ import (
 // BenchmarkAllowHit 基准:令牌充足时的 Allow 命中。
 func BenchmarkAllowHit(b *testing.B) {
 	l, err := NewTokenBucket(1e9, 1e9)
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = l.Allow()
@@ -21,9 +21,8 @@ func BenchmarkAllowHit(b *testing.B) {
 // BenchmarkWaitHit 基准:令牌充足时的 Wait 命中。
 func BenchmarkWaitHit(b *testing.B) {
 	l, err := NewTokenBucket(1e9, 1e9)
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	ctx := context.Background()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -34,9 +33,8 @@ func BenchmarkWaitHit(b *testing.B) {
 // BenchmarkAllowReject 基准:令牌耗尽时的拒绝。
 func BenchmarkAllowReject(b *testing.B) {
 	l, err := NewTokenBucket(0.001, 1)
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	_ = l.Allow()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -47,9 +45,8 @@ func BenchmarkAllowReject(b *testing.B) {
 // BenchmarkCBAallow 基准:熔断器 Closed 状态放行。
 func BenchmarkCBAallow(b *testing.B) {
 	cb, err := NewCircuitBreaker()
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = cb.Allow()
@@ -59,9 +56,8 @@ func BenchmarkCBAallow(b *testing.B) {
 // BenchmarkBulkheadTryAcquire 基准:舱壁非阻塞获取并释放。
 func BenchmarkBulkheadTryAcquire(b *testing.B) {
 	bh, err := NewBulkhead(1e6)
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		release, ok := bh.TryAcquire()
@@ -74,9 +70,8 @@ func BenchmarkBulkheadTryAcquire(b *testing.B) {
 // BenchmarkWindowAllow 基准:固定窗口放行。
 func BenchmarkWindowAllow(b *testing.B) {
 	w, err := NewFixedWindow(1e9, time.Second)
-	if err != nil {
-		b.Fatal(err)
-	}
+	testx.RequireNoError(b, err)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = w.Allow()

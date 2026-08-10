@@ -2,6 +2,7 @@ package resiliencex
 
 import (
 	"context"
+	testx "github.com/lcylpzls/testx"
 	"sync"
 	"testing"
 	"time"
@@ -21,13 +22,11 @@ func TestNewBulkheadInvalid(t *testing.T) {
 
 func TestTryAcquireAndRelease(t *testing.T) {
 	b, err := NewBulkhead(1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	release, ok := b.TryAcquire()
-	if !ok {
-		t.Fatal("首次应成功")
-	}
+	testx.RequireTrue(t, ok)
+
 	if _, ok := b.TryAcquire(); ok {
 		t.Fatal("已满应拒绝")
 	}
@@ -43,19 +42,16 @@ func TestTryAcquireAndRelease(t *testing.T) {
 
 func TestAcquireBlocksAndCancel(t *testing.T) {
 	b, err := NewBulkhead(1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	release, err := b.Acquire(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
 	defer cancel()
 	_, err = b.Acquire(ctx)
-	if err == nil {
-		t.Fatal("等待应被取消")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeWaitCanceled {
 		t.Errorf("错误码 = %s,want %s", code, CodeWaitCanceled)
 	}
@@ -73,9 +69,8 @@ func TestBulkheadMetrics(t *testing.T) {
 	m := newFakeMetrics()
 	logger := &fakeLogger{}
 	b, err := NewBulkhead(1, WithMetrics(m), WithLogger(logger))
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	r1, _ := b.TryAcquire()
 	if _, ok := b.TryAcquire(); ok {
 		t.Fatal("已满应拒绝")
@@ -91,9 +86,8 @@ func TestBulkheadMetrics(t *testing.T) {
 
 func TestBulkheadConcurrent(t *testing.T) {
 	b, err := NewBulkhead(4)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	var wg sync.WaitGroup
 	for i := 0; i < 16; i++ {
 		wg.Add(1)
@@ -115,14 +109,12 @@ func TestBulkheadConcurrent(t *testing.T) {
 
 func TestAcquireNilContext(t *testing.T) {
 	b, err := NewBulkhead(1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	//lint:ignore SA1012 有意覆盖 nil context 防护逻辑
 	release, err := b.Acquire(nil)
-	if err != nil {
-		t.Fatalf("nil ctx 应视为 Background:%v", err)
-	}
+	testx.RequireNoError(t, err)
+
 	release()
 }
 
@@ -135,9 +127,8 @@ func FuzzBulkhead(f *testing.F) {
 			n = 1
 		}
 		b, err := NewBulkhead(n)
-		if err != nil {
-			t.Fatal(err)
-		}
+		testx.RequireNoError(t, err)
+
 		var releases []func()
 		for i := 0; i < n; i++ {
 			if r, ok := b.TryAcquire(); ok {

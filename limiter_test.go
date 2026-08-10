@@ -2,6 +2,7 @@ package resiliencex
 
 import (
 	"context"
+	testx "github.com/lcylpzls/testx"
 	"math"
 	"sync"
 	"sync/atomic"
@@ -37,9 +38,8 @@ func TestNewTokenBucketInvalid(t *testing.T) {
 
 func TestRateBurst(t *testing.T) {
 	l, err := NewTokenBucket(10, 5)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if l.Rate() != 10 || l.Burst() != 5 {
 		t.Errorf("Rate=%v Burst=%d", l.Rate(), l.Burst())
 	}
@@ -47,9 +47,8 @@ func TestRateBurst(t *testing.T) {
 
 func TestAllowBurst(t *testing.T) {
 	l, err := NewTokenBucket(1, 3)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	for i := 0; i < 3; i++ {
 		if !l.Allow() {
 			t.Fatalf("第 %d 次应通过(突发)", i+1)
@@ -62,9 +61,8 @@ func TestAllowBurst(t *testing.T) {
 
 func TestAllowRefill(t *testing.T) {
 	l, err := NewTokenBucket(1, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	t0 := time.Now()
 	var now atomic.Value
 	now.Store(t0)
@@ -92,9 +90,8 @@ func TestAllowRefill(t *testing.T) {
 
 func TestAllowN(t *testing.T) {
 	l, err := NewTokenBucket(1, 5)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if !l.AllowN(5) {
 		t.Fatal("5 个令牌应通过")
 	}
@@ -111,9 +108,8 @@ func TestAllowN(t *testing.T) {
 
 func TestWaitImmediate(t *testing.T) {
 	l, err := NewTokenBucket(10, 10)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if err := l.Wait(context.Background()); err != nil {
 		t.Fatalf("满桶应立即通过:%v", err)
 	}
@@ -124,9 +120,8 @@ func TestWaitImmediate(t *testing.T) {
 
 func TestWaitNBlocks(t *testing.T) {
 	l, err := NewTokenBucket(100, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if !l.Allow() {
 		t.Fatal("初始应通过")
 	}
@@ -145,9 +140,8 @@ func TestWaitNBlocks(t *testing.T) {
 
 func TestWaitCanceled(t *testing.T) {
 	l, err := NewTokenBucket(1, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	t0 := time.Now()
 	var now atomic.Value
 	now.Store(t0)
@@ -159,9 +153,8 @@ func TestWaitCanceled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	err = l.WaitN(ctx, 1)
-	if err == nil {
-		t.Fatal("取消应返回错误")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeWaitCanceled {
 		t.Errorf("错误码 = %s,want %s", code, CodeWaitCanceled)
 	}
@@ -180,13 +173,11 @@ func TestWaitCanceled(t *testing.T) {
 
 func TestWaitNExceedsBurst(t *testing.T) {
 	l, err := NewTokenBucket(10, 2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	err = l.WaitN(context.Background(), 3)
-	if err == nil {
-		t.Fatal("超过桶容量应报错")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeInvalidConfig {
 		t.Errorf("错误码 = %s,want %s", code, CodeInvalidConfig)
 	}
@@ -194,9 +185,8 @@ func TestWaitNExceedsBurst(t *testing.T) {
 
 func TestWaitNilContext(t *testing.T) {
 	l, err := NewTokenBucket(100, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if !l.Allow() {
 		t.Fatal("初始应通过")
 	}
@@ -209,9 +199,8 @@ func TestWaitNilContext(t *testing.T) {
 func TestLimiterMetrics(t *testing.T) {
 	m := newFakeMetrics()
 	l, err := NewTokenBucket(1, 2, WithMetrics(m))
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	l.Allow()
 	l.Allow()
 	l.Allow() // 拒绝
@@ -226,9 +215,8 @@ func TestLimiterMetrics(t *testing.T) {
 func TestLimiterWaitDurationMetric(t *testing.T) {
 	m := newFakeMetrics()
 	l, err := NewTokenBucket(100, 1, WithMetrics(m))
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if !l.Allow() {
 		t.Fatal("初始应通过")
 	}
@@ -261,16 +249,14 @@ func TestErrCircuitOpen(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	if Version != "v1.0.1" {
-		t.Errorf("Version = %s,want v1.0.1", Version)
-	}
+	testx.Equal(t, Version, "v1.1.0")
+
 }
 
 func TestSetRate(t *testing.T) {
 	l, err := NewTokenBucket(1, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if err := l.SetRate(10); err != nil {
 		t.Fatalf("SetRate 失败:%v", err)
 	}
@@ -305,20 +291,17 @@ func TestLimiterOptions(t *testing.T) {
 	logger := &fakeLogger{}
 	m := newFakeMetrics()
 	l, err := NewTokenBucket(1, 1, WithMetrics(m), WithLogger(logger), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if l.metrics != m {
-		t.Error("Metrics 选项未生效")
-	}
+	testx.RequireNoError(t, err)
+
+	testx.Equal(t, l.metrics, m)
+
 	_ = logger
 }
 
 func TestLimiterConcurrent(t *testing.T) {
 	l, err := NewTokenBucket(100000, 100)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	var accepted, rejected atomic.Int64
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {

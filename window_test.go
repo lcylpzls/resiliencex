@@ -2,6 +2,7 @@ package resiliencex
 
 import (
 	"context"
+	testx "github.com/lcylpzls/testx"
 	"sync"
 	"testing"
 	"time"
@@ -48,9 +49,8 @@ func TestNewWindowInvalid(t *testing.T) {
 func TestFixedWindow(t *testing.T) {
 	clock := &fakeWindowClock{t: time.Now()}
 	w, err := NewFixedWindow(2, time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	w.cfg.now = clock.now
 	w.start = clock.now() // 起始时间与注入时钟对齐
 	for i := 0; i < 2; i++ {
@@ -70,9 +70,8 @@ func TestFixedWindow(t *testing.T) {
 func TestSlidingWindow(t *testing.T) {
 	clock := &fakeWindowClock{t: time.Now()}
 	w, err := NewSlidingWindow(2, time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	w.cfg.now = clock.now
 	for i := 0; i < 2; i++ {
 		if !w.Allow() {
@@ -112,9 +111,8 @@ func TestSlidingWindow(t *testing.T) {
 func TestWindowWait(t *testing.T) {
 	clock := &fakeWindowClock{t: time.Now()}
 	w, err := NewFixedWindow(1, 50*time.Millisecond)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	w.cfg.now = clock.now
 	w.start = clock.now()
 	if !w.Allow() {
@@ -132,9 +130,8 @@ func TestWindowWait(t *testing.T) {
 func TestWindowWaitCanceled(t *testing.T) {
 	clock := &fakeWindowClock{t: time.Now()}
 	w, err := NewFixedWindow(1, time.Hour)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	w.cfg.now = clock.now
 	if !w.Allow() {
 		t.Fatal("首次应通过")
@@ -142,9 +139,8 @@ func TestWindowWaitCanceled(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
 	defer cancel()
 	err = w.Wait(ctx)
-	if err == nil {
-		t.Fatal("等待应被取消")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeWaitCanceled {
 		t.Errorf("错误码 = %s,want %s", code, CodeWaitCanceled)
 	}
@@ -152,9 +148,8 @@ func TestWindowWaitCanceled(t *testing.T) {
 
 func TestWindowWaitNilContext(t *testing.T) {
 	w, err := NewFixedWindow(1e9, time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	//lint:ignore SA1012 有意覆盖 nil context 防护逻辑
 	if err := w.Wait(nil); err != nil {
 		t.Fatalf("nil ctx 应视为 Background:%v", err)
@@ -165,9 +160,8 @@ func TestWindowMetrics(t *testing.T) {
 	m := newFakeMetrics()
 	logger := &fakeLogger{}
 	w, err := NewFixedWindow(1, time.Second, WithMetrics(m), WithLogger(logger))
-	if err != nil {
-		t.Fatal(err)
-	}
+	testx.RequireNoError(t, err)
+
 	if !w.Allow() {
 		t.Fatal("首次应通过")
 	}

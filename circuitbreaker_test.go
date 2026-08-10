@@ -2,6 +2,7 @@ package resiliencex
 
 import (
 	"errors"
+	testx "github.com/lcylpzls/testx"
 	"math"
 	"sync"
 	"testing"
@@ -13,9 +14,8 @@ import (
 func newTestCB(t *testing.T, opts ...Option) *CircuitBreaker {
 	t.Helper()
 	cb, err := NewCircuitBreaker(opts...)
-	if err != nil {
-		t.Fatalf("NewCircuitBreaker 失败:%v", err)
-	}
+	testx.RequireNoError(t, err)
+
 	return cb
 }
 
@@ -112,9 +112,8 @@ func TestOpenRejects(t *testing.T) {
 	cb := newTestCB(t, WithFailureThreshold(1.0), WithMinRequests(1))
 	cb.Failure()
 	err := cb.Allow()
-	if err == nil {
-		t.Fatal("Open 应拒绝")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeCircuitOpen {
 		t.Errorf("错误码 = %s,want %s", code, CodeCircuitOpen)
 	}
@@ -223,9 +222,8 @@ func TestExecute(t *testing.T) {
 func TestExecuteNilFn(t *testing.T) {
 	cb := newTestCB(t)
 	err := cb.Execute(nil)
-	if err == nil {
-		t.Fatal("nil 执行函数应报错")
-	}
+	testx.RequireError(t, err)
+
 	if code, _ := errx.CodeOf(err); code != CodeInvalidConfig {
 		t.Errorf("错误码 = %s,want %s", code, CodeInvalidConfig)
 	}
@@ -341,9 +339,8 @@ func FuzzCircuitBreaker(f *testing.F) {
 			WithMinRequests(2),
 			WithOpenTimeout(time.Millisecond),
 		)
-		if err != nil {
-			t.Fatal(err)
-		}
+		testx.RequireNoError(t, err)
+
 		for i := uint8(0); i < n%8; i++ {
 			switch op % 3 {
 			case 0:
