@@ -7,4 +7,7 @@ require (
 	github.com/lcylpzls/resiliencex v1.3.0
 )
 
-require github.com/lcylpzls/logx v1.2.5 // indirect
+require (
+	github.com/lcylpzls/logx v1.2.5 // indirect
+	github.com/lcylpzls/validx v1.2.0 // indirect
+)
