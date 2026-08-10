@@ -8,6 +8,7 @@ import (
 
 	"github.com/lcylpzls/errx"
 	"github.com/lcylpzls/logx"
+	"github.com/lcylpzls/validx"
 )
 
 // 熔断器默认参数与窗口默认值。
@@ -239,25 +240,34 @@ func NewCircuitBreaker(opts ...Option) (*CircuitBreaker, error) {
 	}, nil
 }
 
-// validateCircuitConfig 校验熔断器配置。
+// init 注册熔断器配置校验规则到 validx 全局规则表，错误码保持 resiliencex 语义。
+func init() {
+	_ = validx.RegisterRule("resiliencex_circuit_config", func(value any, param, path string) error {
+		// validx 会解引用指针，内部调用保证 value 为 circuitConfig。
+		cfg := value.(circuitConfig)
+		if math.IsNaN(cfg.failureThreshold) || math.IsInf(cfg.failureThreshold, 0) ||
+			cfg.failureThreshold <= 0 || cfg.failureThreshold > 1 {
+			return errx.NewCode(CodeInvalidConfig, "失败率阈值必须在 (0,1]")
+		}
+		if cfg.minRequests < 1 {
+			return errx.NewCode(CodeInvalidConfig, "最小请求数必须大于等于 1")
+		}
+		if cfg.openTimeout <= 0 {
+			return errx.NewCode(CodeInvalidConfig, "打开超时必须为正数")
+		}
+		if cfg.halfOpenMax < 1 {
+			return errx.NewCode(CodeInvalidConfig, "半开探测数必须大于等于 1")
+		}
+		if cfg.slotDuration <= 0 || cfg.windowSize < 1 {
+			return errx.NewCode(CodeInvalidConfig, "窗口参数非法")
+		}
+		return nil
+	})
+}
+
+// validateCircuitConfig 校验熔断器配置（统一走 validx 规则）。
 func validateCircuitConfig(cfg *circuitConfig) error {
-	if math.IsNaN(cfg.failureThreshold) || math.IsInf(cfg.failureThreshold, 0) ||
-		cfg.failureThreshold <= 0 || cfg.failureThreshold > 1 {
-		return errx.NewCode(CodeInvalidConfig, "失败率阈值必须在 (0,1]")
-	}
-	if cfg.minRequests < 1 {
-		return errx.NewCode(CodeInvalidConfig, "最小请求数必须大于等于 1")
-	}
-	if cfg.openTimeout <= 0 {
-		return errx.NewCode(CodeInvalidConfig, "打开超时必须为正数")
-	}
-	if cfg.halfOpenMax < 1 {
-		return errx.NewCode(CodeInvalidConfig, "半开探测数必须大于等于 1")
-	}
-	if cfg.slotDuration <= 0 || cfg.windowSize < 1 {
-		return errx.NewCode(CodeInvalidConfig, "窗口参数非法")
-	}
-	return nil
+	return validx.ValidateField(cfg, "resiliencex_circuit_config")
 }
 
 // Allow 检查请求是否可放行。
