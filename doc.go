@@ -1,4 +1,3 @@
-// Package resiliencex 提供服务治理组件:
-// 令牌桶限流、熔断器与舱壁隔离,
-// 拒绝语义统一 errx,观测外部注入,零第三方依赖。
+// Package resiliencex 提供弹性基座（限流、熔断、舱壁与滑动窗口）。
+// 实现主体位于 internal/core，本包仅暴露稳定公开 API。
 package resiliencex

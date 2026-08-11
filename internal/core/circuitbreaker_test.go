@@ -1,4 +1,4 @@
-package resiliencex
+package core
 
 import (
 	"errors"

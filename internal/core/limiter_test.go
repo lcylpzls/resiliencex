@@ -1,4 +1,4 @@
-package resiliencex
+package core
 
 import (
 	"context"
@@ -263,7 +263,7 @@ func TestErrCircuitOpen(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	testx.Equal(t, Version, "v1.1.0")
+	testx.Equal(t, Version, "v1.4.0")
 
 }
 
