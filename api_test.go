@@ -9,7 +9,7 @@ import (
 
 // TestPublicAPI 黑盒冒烟测试：覆盖根包全部转发函数、类型别名与常量。
 func TestPublicAPI(t *testing.T) {
-	if resiliencex.Version != "v1.4.0" {
+	if resiliencex.Version != "v1.4.1" {
 		t.Fatalf("Version = %s", resiliencex.Version)
 	}
 

@@ -3,7 +3,7 @@
 自研服务治理组件库:令牌桶限流、熔断器、舱壁隔离,
 拒绝语义统一 errx,观测外部注入,零第三方依赖。
 
-> 当前状态:**v1.0.0 正式版,API 已冻结**。
+> 当前状态:**v1.4.1**。
 
 ## 快速上手
 
@@ -74,7 +74,6 @@ resiliencex 不是治理编排框架,不解决「组件怎么串」的问题;它
 
 - [docs/README.md](docs/README.md) — 文档索引
 - [docs/operations.md](docs/operations.md) — 运行手册
-- [docs/comparison.md](docs/comparison.md) — 与治理库对比
 - [examples/gateway](examples/gateway) — 组合示例
 
 ## 贡献与安全
@@ -85,15 +84,13 @@ resiliencex 不是治理编排框架,不解决「组件怎么串」的问题;它
 ## 稳定性承诺
 
 - 本库遵循[语义化版本](https://semver.org/lang/zh-CN/);
-- v1.0.0 起公开 API 冻结:新增组件与能力以次版本发布,
-  破坏性变更仅随主版本;
+- 家族约定:破坏性变更统一走 minor 版本(不强制主版本升级);
 - 每个版本发布前执行:100% 覆盖率、race、staticcheck、fuzz ×4、
-  govulncheck、apidiff 对比与三平台 CI。
+  govulncheck 与三平台 CI。
 
 ## 文档
 
 - [docs/README.md](docs/README.md) — 文档索引
-- [docs/resilience-research.md](docs/resilience-research.md) — 治理领域调研手册
 
 ## License
 

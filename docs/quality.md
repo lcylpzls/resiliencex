@@ -7,7 +7,7 @@
 - `go test -race` 全绿;
 - fuzz 目标 4 个(limiter / circuitbreaker / bulkhead / window);
 - 三平台 CI(ubuntu / windows / macos)× Go 1.26;
-- govulncheck 零告警;go.mod tidy 无漂移;apidiff 对比上一 tag;
+- govulncheck 零告警;go.mod tidy 无漂移;
 - 示例全部可构建并通过 vet。
 
 ## 测试策略
@@ -27,4 +27,4 @@ CB Allow / Window Allow)要求 0 分配。
 ## API 兼容性
 
 - <1.0.0 允许有意的破坏性变更,须在 CHANGELOG 说明;
-- v1.0.0 起 API 冻结,破坏性变更仅随大版本。
+- 破坏性变更按家族约定走 minor 版本,并在 CHANGELOG 显著标注。
