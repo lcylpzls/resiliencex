@@ -1,6 +1,6 @@
 # resiliencex 架构设计
 
-> 状态:已实现(v1.5.0),本文描述当前架构;公开 API 以 `go doc` 与 README 为准。
+> 状态:已实现(v1.5.1),本文描述当前架构;公开 API 以 `go doc` 与 README 为准。
 
 ## 1. 总体分层
 
@@ -10,6 +10,7 @@
 ├── circuitbreaker(三态状态机 + 滑动窗口统计)
 ├── bulkhead(信号量隔离)
 ├── window(固定/滑动窗口计数限流)
+├── keyed_window(按 key 固定窗口,容量上限 + TTL 清理)
 └── 观测层(Metrics 注入 + 事件回调 + logx 日志)
 ```
 
@@ -21,6 +22,7 @@
 | `circuitbreaker.go` | 三态状态机、统计、探测、事件 |
 | `bulkhead.go` | 信号量隔离 |
 | `window.go` | 固定 / 滑动窗口计数 |
+| `keyed_window.go` | 按 key 固定窗口表:独立计数、容量淘汰、TTL 清理 |
 | `metrics.go` | Metrics 接口与注入 |
 | `errors.go` | RESX_* 错误码 |
 | `options.go` | 各组件配置与校验 |

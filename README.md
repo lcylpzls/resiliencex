@@ -57,9 +57,10 @@ if !window.Allow() {
 ## 定位
 
 resiliencex 不是治理编排框架,不解决「组件怎么串」的问题;它提供
-每个依赖调用方都要重复的三个独立组件:
+每个依赖调用方都要重复的独立组件:
 
 - 限流:令牌桶,平滑 + 突发,Allow / Wait(ctx) 双 API;
+- 按 key 限流:KeyedWindow,任意 key 独立计数,容量上限 + TTL 清理;
 - 熔断:三态状态机、滑动窗口失败率、HalfOpen 探测;
 - 舱壁:信号量隔离,ctx 取消感知。
 - 组合示例:限流 + 熔断 + 舱壁串联(见 examples/gateway)。

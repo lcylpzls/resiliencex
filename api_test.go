@@ -9,7 +9,7 @@ import (
 
 // TestPublicAPI 黑盒冒烟测试：覆盖根包全部转发函数、类型别名与常量。
 func TestPublicAPI(t *testing.T) {
-	if resiliencex.Version != "v1.4.1" {
+	if resiliencex.Version != "v1.5.1" {
 		t.Fatalf("Version = %s", resiliencex.Version)
 	}
 
@@ -25,6 +25,24 @@ func TestPublicAPI(t *testing.T) {
 	if err != nil || sw == nil {
 		t.Fatalf("NewSlidingWindow 失败：%v", err)
 	}
+	kw, err := resiliencex.NewKeyedFixedWindow(1, time.Second,
+		resiliencex.WithKeyedWindowMaxKeys(10),
+		resiliencex.WithKeyedWindowTTL(time.Minute),
+		resiliencex.WithKeyedWindowClock(time.Now),
+		resiliencex.WithKeyedWindowMetrics(nil),
+		resiliencex.WithKeyedWindowLogger(nil),
+	)
+	if err != nil || kw == nil {
+		t.Fatalf("NewKeyedFixedWindow 失败：%v", err)
+	}
+	if !kw.Allow("a") {
+		t.Fatal("KeyedWindow 首次应允许")
+	}
+	_ = kw.Allow("a")
+	_ = kw.Len()
+	kw.Reset()
+	var _ resiliencex.KeyedWindow
+	var _ resiliencex.KeyedWindowOption
 	lb, err := resiliencex.NewTokenBucket(1, 1)
 	if err != nil || lb == nil {
 		t.Fatalf("NewTokenBucket 失败：%v", err)

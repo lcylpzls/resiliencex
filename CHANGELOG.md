@@ -3,6 +3,21 @@
 本项目遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
 
+## [v1.5.1] - 2026-08-12
+
+### 新增
+
+- `NewKeyedFixedWindow` / `KeyedWindow`：按任意 key 维护固定窗口
+  限流（如按设备 MAC、来源 IP 做 PPS 限流），支持容量上限淘汰与
+  空闲 TTL 清理，可注入时钟 / 指标 / 日志；
+- 配套选项：`WithKeyedWindowMaxKeys` / `WithKeyedWindowTTL` /
+  `WithKeyedWindowClock` / `WithKeyedWindowMetrics` /
+  `WithKeyedWindowLogger`。
+
+### 修复
+
+- `Version` 常量修正为 v1.5.1（上一发布批次遗漏同步）。
+
 ## [v1.5.0] - 2026-08-11
 
 ### 破坏性变更

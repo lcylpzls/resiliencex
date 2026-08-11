@@ -263,7 +263,7 @@ func TestErrCircuitOpen(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	testx.Equal(t, Version, "v1.4.1")
+	testx.Equal(t, Version, "v1.5.1")
 
 }
 
